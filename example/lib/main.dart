@@ -30,7 +30,7 @@ class _MyAppState extends State<MyApp> {
           child: Text("Play DTMF"),
           onPressed: () async {
             await Dtmf.playTone(
-                digits: "#1234567890*",
+                digits: "1",
                 samplingRate: 8000,
                 durationMs: 160,
                 volume: 0.8,

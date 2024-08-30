@@ -5,17 +5,9 @@ import CallKit
 
 public class SwiftDtmfPlugin: NSObject, FlutterPlugin {
 
-    var _engine: AVAudioEngine
-    var _player:AVAudioPlayerNode
-    var _mixer: AVAudioMixerNode
-    
-  public override init() {
-    _engine = AVAudioEngine();
-    _player = AVAudioPlayerNode()
-    _mixer = _engine.mainMixerNode;
-    
-    super.init()
-    }
+    var _engine: AVAudioEngine?
+    var _player:AVAudioPlayerNode?
+    var _mixer: AVAudioMixerNode?
     
   public static func register(with registrar: FlutterPluginRegistrar) {
     let channel = FlutterMethodChannel(name: "flutter_dtmf", binaryMessenger: registrar.messenger())
@@ -38,7 +30,13 @@ public class SwiftDtmfPlugin: NSObject, FlutterPlugin {
     
     func playTone(digits: String, volume: Double?, samplingRate: Double, durationMs: Int, flutterResult: @escaping FlutterResult)
     {
-       
+        try? AVAudioSession.sharedInstance().setCategory(.ambient)
+        try? AVAudioSession.sharedInstance().setActive(true)
+
+        _engine = AVAudioEngine()
+        _player = AVAudioPlayerNode()
+        _mixer = _engine!.mainMixerNode
+
         let _sampleRate = Float(samplingRate)
 
         if let tones = DTMF.tonesForString(digits) {
@@ -61,22 +59,23 @@ public class SwiftDtmfPlugin: NSObject, FlutterPlugin {
                 memcpy(frameMemory, allSamples, Int(frameCount) * MemoryLayout<Float>.size)
             }
             
-            _engine.attach(_player)
-            _engine.connect(_player, to:_mixer, format:audioFormat)
+            _engine!.attach(_player!)
+            _engine!.connect(_player!, to:_mixer!, format:audioFormat)
             
             do {
-                try _engine.start()
+                try _engine!.start()
             } catch let error as NSError {
                 flutterResult(false)
                 print("Engine start failed - \(error)")
             }
             
-            _player.scheduleBuffer(buffer, at:nil,completionHandler:nil)
+            _player!.scheduleBuffer(buffer, at:nil,completionHandler:nil)
             if (volume != nil) {
-                _player.volume = Float(volume!)
+                _player!.volume = Float(volume!)
             }
-            _player.play()
+            _player!.play()
             flutterResult(true)
+            try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
     }
   }
   
