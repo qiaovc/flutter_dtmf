@@ -30,9 +30,6 @@ public class SwiftDtmfPlugin: NSObject, FlutterPlugin {
     
     func playTone(digits: String, volume: Double?, samplingRate: Double, durationMs: Int, flutterResult: @escaping FlutterResult)
     {
-        try? AVAudioSession.sharedInstance().setCategory(.ambient)
-        try? AVAudioSession.sharedInstance().setActive(true)
-
         _engine = AVAudioEngine()
         _player = AVAudioPlayerNode()
         _mixer = _engine!.mainMixerNode
@@ -75,7 +72,6 @@ public class SwiftDtmfPlugin: NSObject, FlutterPlugin {
             }
             _player!.play()
             flutterResult(true)
-            try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
     }
   }
   
